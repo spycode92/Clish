@@ -1,0 +1,308 @@
+/*
+<link rel="stylesheet" href="the_best_styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Nanum+Myeongjo&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Orelega+One&display=swap" rel="stylesheet">
+ 
+ */
+
+                                    /* THE BEST STYLES */           
+
+
+                                    /* ******** */
+  /* CSS 파일에 추가할 내용이 있으면 문서에 주석을 남겨주세요. 
+  또는 알려주시면 추가하겠습니다. 이 CSS에 문제가 있으면 사진을 보내주시거나 보여주세요. - 아이작                               */
+
+
+ /* UNIVERSAL STYLES */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+h1 {
+    margin: 30px 0;
+    text-align: center;
+}
+/* remove dots from list  목록에서 점 제거 */
+ul {
+    list-style: none;
+
+}
+
+body, form, table, th, td, select option, select, 
+form :placeholder-shown, form input, form textarea {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #FFF;
+    color: #333;
+}
+
+section {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+/* BUTTON SECTION */
+
+
+
+
+button, .button {
+    background-color: #FF7601;
+    color: #fff;
+    border-radius: 10px;
+    width: 80px;
+    height: 30px;
+    border: none;
+    display: block;
+}
+
+button:hover, .button:hover {
+    background-color: #FF8C00;
+    transform: translateY(-2px);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+button:active .button:active {
+    background-color: #FF7601;
+    transform: translateY(0);
+    transition: background-color 0.1s ease, transform 0.1s ease;
+}
+
+.blue-button {
+    background-color: #00809D;
+}
+
+button.blue-button[disabled] {
+  background-color: #a0c3cc;
+  color:  #eeeeee;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.blue-button:hover {
+    background-color: #006B7A;
+    color: #fff;
+}
+.white-button {
+    background-color: #fff;
+    color: #FF7601;
+    border: solid 1px #FF7601;
+
+}
+.white-button:hover {
+    background-color: #FF7601;
+    color: #fff;
+}
+.blue-button2 {
+    background-color: rgba(0, 128, 157, 0.5);
+}
+.blue-button2:hover {
+    background-color: rgba(0, 128, 157, 0.7);
+    color: #fff;
+}
+.gray-button {
+    background-color: #d9d9d9;
+    color: #565656;
+}
+.big-button {
+    width:275px;
+}
+.header-button {
+    box-shadow: 0 4.8px 4.8px rgba(0, 0, 0, 0.1);
+    border: solid 1.2px #fff;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+a:visited {
+    color: purple;
+}
+
+
+
+
+                        /* TABLE SECTION */
+
+table {
+    
+    /* border-spacing: 0; */
+    /* border-radius: 10px; */
+    outline: 1px solid #d9d9d9;
+    border-radius: 10px;
+    margin: 30px;
+    border-collapse: collapse;
+}
+
+            /* BORDER RADIUS ADDED MANUALLY BECAUSE OF TABLE BORDER COLLAPSE ISSUE
+            테이블 테두리 붕괴 문제로 인해 수동으로 추가 된 테두리 반경 */
+
+tr:first-child > th:first-child {
+    border-radius: 10px 0 0 0;
+}
+tr:first-child > th:last-child {
+    border-radius: 0 10px 0 0;
+}
+tr:last-child > td:last-child {
+    border-radius: 0 0 10px 0;
+}
+tr:last-child > td:first-child {
+    border-radius: 0 0 0 10px;
+}
+
+th, td {
+    padding: 8px 15px;
+    border-bottom: #d9d9d9 solid 1.2px;
+}
+
+th {
+    background-color: #D9D9D9;
+    text-align: center;
+    border: none;
+}
+.table-with-side-borders td {
+    border-left: #d9d9d9 solid 1.2px;
+    border-right: #d9d9d9 solid 1.2px;
+
+}
+
+
+
+
+
+
+                            /* FORM */
+form {
+    display: block;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #d9d9d9;
+}
+form input[type="text"],
+form input[type="password"],
+form input[type="email"],
+form textarea,
+form select,
+form input[type="number"],
+form input[type="date"],
+form input[type="tel"],
+form input[type="url"],
+form input[type="search"],
+form input[type="file"],
+form input[type="date-local"],
+form input[type="time"],
+form input[type="month"],
+form input[type="week"],
+form input[type="date"],
+select option {
+    width: 100%;  
+    padding: 10px;
+    margin: 5px 0 15px 0;
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
+}
+
+
+form input[type="submit"],
+form input[type="button"],
+form input[type="reset"] {
+    background-color: #FF7601;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 7px 15px;
+    cursor: pointer;
+}
+
+form input[type="submit"]:hover,
+form input[type="button"]:hover,
+form input[type="reset"]:hover {
+    background-color: #FF8C00;
+    transform: translateY(-2px);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+form input[type="submit"]:active,
+form input[type="button"]:active,
+form input[type="reset"]:active {
+    background-color: #FF7601;
+    transform: translateY(0);
+    transition: background-color 0.1s ease, transform 0.1s ease;
+}
+fieldset {
+    border: 1px solid #d9d9d9;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+}
+form input[type="checkbox"],
+form input[type="radio"] {
+    margin-right: 10px;
+}
+
+
+/* SUB NAVIGATION */
+
+.sub-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    padding: 10px;
+    
+    margin: 50px;
+}
+.sub-nav li {
+    display: inline-block;
+    padding: 0 10px;
+    color: #d9d9d9;
+    min-width: 100px;
+    text-align: center;
+   border-bottom: #d9d9d9 solid 1.2px;
+    
+}
+
+.sub-nav li:active {
+    color: #333;
+    font-weight: bold;
+    border-bottom: #FF7601 solid 2px;
+}
+
+.sub-nav li:hover a {
+    color: #333 !important;
+    font-weight: bold;
+}
+.sub-nav li > a:visited {
+    color: #d9d9d9;
+}
+
+.small-thumbnail {
+    display: block;
+    position: relative;
+    width: 250px;
+    height: 200px;
+    object-fit: cover;
+    margin: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+}
+.medium-thumbnail {
+    width: 600px;
+    height: 400px;
+    object-fit: cover;
+    margin: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+}
+
+
+.orange-tag {
+    background-color: #FFDCBE;
+    color: #FF7601;
+    border-radius: 5px;
+    padding: 0 10px;
+    display: inline-block;
+}
+
+

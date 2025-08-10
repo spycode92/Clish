@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.clish.DB.DBMapper">
+
+	<insert id="insertUserData">
+		INSERT INTO `c5d2504t1p1`.`USER` (
+    user_idx,
+    user_name,
+    user_rep_name,
+    user_birth,
+    user_gender,
+    user_id,
+    user_password,
+    user_email,
+    user_phone_number,
+    user_phone_number_sub,
+    user_postcode,
+    user_address1,
+    user_address2,
+    user_status,
+    user_reg_date,
+    user_withdraw_date,
+    user_type,
+    user_penalty_count
+  )
+  VALUES (
+    #{userIdx},
+    #{userName},
+    #{userRepName},
+    #{userBirth},
+    #{userGender},
+    #{userId},
+    #{userPassword},
+    #{userEmail},
+    #{userPhoneNumber},
+    #{userPhoneNumberSub},
+    #{userPostcode},
+    #{userAddress1},
+    #{userAddress2},
+    #{userStatus},
+    #{userRegDate},
+    null,
+    1,
+    0)
+		
+	</insert>
+
+	<insert id="insertReservation">
+	INSERT INTO RESERVATION (
+    reservation_idx,
+    user_idx,
+    reservation_members,
+    reservation_class_date,
+    reservation_com,
+    class_idx,
+    reservation_status
+  )
+  VALUES (
+    #{reservationIdx},
+    #{userIdx},
+    #{reservationMembers},
+    #{reservationClassDate},
+    #{reservationCom},
+    #{classIdx},
+    #{reservationStatus}
+  )
+	</insert>
+	
+	<insert id="insertPaymentInfo">
+	INSERT INTO PAYMENT_INFO(
+	imp_uid,
+    reservation_idx,
+    class_title,
+    amount,
+    status,
+    user_name,
+    pay_method,
+    request_time,
+    pay_time,
+    cancel_reason,
+    cancel_time,
+    receipt_url
+	)VALUES (
+    #{impUid},
+    #{reservationIdx},
+    (SELECT class_title FROM CLASS WHERE class_idx = #{classIdx}),  <!-- 실제 클래스 테이블명과 컬럼명 확인 필요 -->
+    #{amount},
+    #{status},
+    (SELECT user_name FROM USER WHERE user_idx = #{userIdx}),
+    #{payMethod},
+    #{requestTime},
+    #{payTime},
+    null,
+    null,
+    #{receiptUrl}
+    )
+	</insert>
+
+	
+	
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.event.mapper.EventMapper">
+
+<select id="selectEventList" resultType="com.itwillbs.clish.admin.dto.EventDTO">
+		SELECT *
+		FROM 
+			EVENT
+		WHERE
+			event_in_progress IN (1, 2)
+	</select>
+	<select id="selectEvent" resultType="com.itwillbs.clish.admin.dto.EventDTO">
+		SELECT * 
+		FROM
+			EVENT
+		WHERE
+			event_idx = #{eventIdx}
+	</select>
+
+</mapper>

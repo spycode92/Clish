@@ -1,0 +1,361 @@
+#top-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-direction: row;
+    height: 100px;
+	border-radius: 0;
+    /* box-sizing: border-box; */
+}
+#top-menu img {
+    margin: 0 10px;
+}
+#logo {
+    width: 110px;
+    height: auto;
+}
+
+#search-form > form {
+    border: none;
+}
+
+#top-menu nav {
+    margin: 0 auto;
+}
+
+
+#flex-item2 > li > a {
+    display: inline-block;
+    padding: 10px 15px;
+    color: #333;
+    width: calc(clamp(10px, 1vw, 20px) * 7);
+    font-size: clamp(10px, 1vw, 20px);
+    text-overflow: none;
+    
+
+}
+#flex-item2 > li > a:hover, #small-menu:hover {
+	background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+#flex-item2 > li {
+    width: 12.5%;
+}
+#flex-item2 > li:first-child {
+    width: 50%;
+}
+#small-menu {
+	font-size: 24px;
+	padding: 10px 15px;
+}
+
+
+
+                        /* SEARCH BAR/ */
+form#search-form {
+    border: none;
+    width: 100%;
+    display: inline-block;
+    height: 80px;
+}
+#top-menu form input[type="search"] {
+
+    background-color: rgba(0, 128, 157, 0.5);
+    width: 100%;
+    display: inline-block;
+  
+}
+#top-menu {
+    border-bottom: 2px solid #d9d9d9;
+    border-right: none;
+    border-left: none;
+    border-top: none;
+}
+input#search {
+    background-image: url("/resources/images/search.png");
+    background-position: 95% center;
+    background-repeat: no-repeat;
+    top: 50%;
+    text-indent: 40px;
+}
+#search:active, #search:focus { 
+    background-image: none;
+    text-indent: 0;
+    outline: none;
+    border: ridge 2px rgba(0, 128, 157, 1);
+}
+
+
+
+
+
+#noti:hover {
+    transform: translateY(-2px);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+#noti:active {
+    transform: translateY(0);
+    transition: background-color 0.1s ease, transform 0.1s ease;
+}
+
+/* 		right side header buttons */
+#top-menu .header-button {
+    margin: 0 10px;
+	padding: 5px;
+    width: 100px;
+	height: 35px;
+	font-size: 14px;
+	text-align: center;
+}
+#top-menu .header-button:visited {
+	color: #fff;
+}
+
+#header-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 500px;
+}
+
+/* 	search bar and search sections */
+#flex-item2 {
+    width: 70vw;
+    max-width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    margin: 0 10px;
+    padding: 0;
+}
+
+
+
+    /* SUB NAVIGATION */
+#sub-nav {
+    display: none;
+    flex-direction: row;
+    justify-content: center;
+    top: 100px;
+    left: 0;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    float: left;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+#sub-nav ul {
+    list-style: none;
+    margin-right: 10vw;
+}
+
+#sub-nav ul li {
+    padding: 8px 12px;
+}
+
+#sub-nav ul li:hover {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+#sub-nav ul li a {
+    text-decoration: none;
+    color: #333;
+}
+
+
+/* 					notification button */
+#notification-box {
+	display: none;
+	position: absolute;
+	width: 300px;
+	border-radius: 20px;
+	box-shadow: 0 3.2px 16.2px rgba(0, 0, 0, 0.3);
+	margin-top: 200px;
+	right: 20px;
+	background-color: #fff;
+	padding: 20px;
+}
+
+#notification-box > ul > li:nth-child(odd) {
+	background-color: #d9d9d9;
+}
+#notification-box > h3 {
+	padding: 5px;
+	border-bottom: #333 solid 2px;
+}
+#notification-box > ul > span {
+	float: right;
+	margin-left: auto;
+}
+#notification-box > ul > li {
+	margin-top: 5px;
+}
+#small-menu {
+	display:none;
+}
+
+
+@media screen and (max-width: 1250px) {
+	#flex-item2 {
+	display: none;
+	}
+	#small-menu {
+	display: inline-block;
+	}
+	
+}
+
+/* notification */
+#notification-box {
+    position: absolute;
+    top: 100%; 
+    right: 240px;  
+    margin-top: 0.5em; 
+    width: 420px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 100;
+    padding-top: 0;
+}
+
+#notification-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+#notification-list li {
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+#notification-list li:hover {
+    background: #f9f9f9;
+}
+
+#notification-list li .dot {
+    font-size: 14px;
+}
+
+#notification-header {
+	display: flex; 
+	justify-content: space-between; 
+	align-items: center;
+	border-bottom: 1px solid #ddd;
+	position: sticky;
+	top: 0;
+	background: white;
+	width: 370px;
+	z-index: 999;
+}
+
+#notification-header a {
+	color: black;
+}
+
+.no-notification {
+    padding: 10px;
+    color: #888;
+    text-align: center;
+}
+
+#notification-box #notification-list li {
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+    background-color: white;
+    white-space: nowrap;       
+  	overflow: hidden;          /* 넘치는 텍스트 감춤 */
+  	text-overflow: ellipsis; 
+}
+
+#notification-list li:hover {
+    background: #f9f9f9;
+}
+
+#notification-box h3 {
+    position: sticky;
+    top: -20px;
+    background: white;
+	padding: 10px;
+    margin: 0;
+    font-size: 1.2em;
+    z-index: 10;
+}
+
+.read-status {
+    font-size: 12px;
+    color: #888;
+    margin-left: 10px;
+}
+.no-notification {
+    text-align: center;
+    color: #999;
+    padding: 10px;
+}
+
+.circle {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 5px;
+}
+.circle.read {
+    background-color: #ccc; 
+}
+.circle.unread {
+    background-color: red;
+}
+
+#notification-header  div {
+	display: flex;
+	gap: 20px;
+	cursor: pointer;
+}
+
+
+.noti-message {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #333;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

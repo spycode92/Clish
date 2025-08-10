@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.admin.mapper.CategoryMapper">
+	<!-- depth에 따른 카테고리 리스트 -->
+	<select id="selectCategoryByDepth" resultType="com.itwillbs.clish.admin.dto.CategoryDTO">
+		SELECT 
+			*
+		FROM
+			CATEGORY
+		WHERE 
+			depth = #{depth}
+		ORDER BY
+			sort_order 
+	</select>
+	
+	<!-- 카테고리 상세 정보 -->
+	<select id="selecCategoryByIdx" resultType="com.itwillbs.clish.admin.dto.CategoryDTO">
+		SELECT *
+		FROM
+			CATEGORY
+		WHERE 
+			category_idx = #{categoryIdx}
+	</select>
+	
+	<!-- 카테고리 추가 -->
+	<insert id="insertCategory">
+		INSERT INTO
+			CATEGORY
+		VALUES (
+			#{categoryIdx}
+			, #{categoryName}
+			, #{depth}
+			<choose>
+			<when test="depth == 1">
+				,null
+			</when>
+			<otherwise>
+				,#{parentIdx}
+			</otherwise>
+			</choose>
+			, #{sortOrder}
+		)
+	</insert>
+	
+	<!-- 카테고리 수정 -->
+	<update id="updateCategory">
+		UPDATE 
+			CATEGORY
+		SET
+			category_name = #{categoryName}
+			, depth = #{depth}
+			<choose>
+			<when test="depth == 1">
+			, parent_idx = null
+			</when>
+			<otherwise>
+			, parent_idx = #{parentIdx}
+			</otherwise>
+			</choose>
+			, sort_order = #{sortOrder}
+		WHERE
+			category_idx = #{categoryIdx}
+	</update>
+	
+	<!--  카테고리 삭제 -->
+	<delete id="deleteCategory">
+		DELETE
+		FROM
+			CATEGORY
+		WHERE
+			category_idx = #{categoryIdx}
+	</delete>
+	
+	<!-- 카테고리 순서 중복 검사 -->
+	<select id="countSortOrder" resultType="int">
+		SELECT COUNT(*)
+		FROM
+			CATEGORY
+		WHERE
+			sort_order = #{sortOrder}
+		<choose>
+		  <when test="parentIdx != null and parentIdx != ''">
+		    AND parent_idx = #{parentIdx}
+		  </when>
+		  <otherwise>
+		    AND parent_idx IS NULL
+		  </otherwise>
+		</choose>
+		<if test="currentIdx != null and currentIdx != ''">
+		   AND category_idx != #{currentIdx}
+		 </if>
+	</select>
+	
+	<!-- 이름 중복검사 -->
+	<select id="countCategoryName" resultType="int">
+	  	SELECT COUNT(*)
+		FROM
+			CATEGORY
+		WHERE
+	    	category_idx LIKE CONCAT('%', #{categoryName}, '%')
+		<if test="currentIdx != null and currentIdx != ''">
+		   AND category_idx != #{currentIdx}
+		 </if>
+	</select>
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

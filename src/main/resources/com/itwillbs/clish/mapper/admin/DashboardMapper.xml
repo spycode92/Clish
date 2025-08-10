@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.admin.mapper.AdminDashboardMapper">
+	<!-- 일반 회원 수 -->
+	<select id="selectUserCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			USER
+		WHERE
+			user_type = 1
+	</select>
+	
+	<!-- 기업 회원 수 -->
+	<select id="selectCompanyCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			USER
+		WHERE
+			user_type = 2
+	</select>
+	
+	<!-- 승인 대기 기업 -->
+	<select id="selectPendingCompanyCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			USER
+		WHERE
+			user_status = 5
+	</select>
+	
+	<!-- 승인 대기 강의 -->
+	<select id="selectPendingClassCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			CLASS
+		WHERE
+			class_status = 1
+	</select>
+	
+	<select id="selectUnAnsweredInquiryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			INQUERY
+		WHERE
+			inquery_status = 1
+		AND
+			inquery_type = 1
+	</select>
+	
+	<!-- 일별 매출 -->
+	<select id="selectDailyRevenue" resultType="com.itwillbs.clish.admin.dto.RevenueDTO">
+		SELECT
+			DATE(FROM_UNIXTIME(pay_time / 1000)) AS date
+			, IFNULL(SUM(amount), 0) AS total
+		FROM 
+			PAYMENT_INFO
+		WHERE
+			status = 'paid'
+		AND
+			pay_time >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY)) * 1000
+		GROUP BY date
+		ORDER BY date ASC
+	</select>
+	
+	<!-- 월간 매출 -->
+	<select id="selectMonthlyRevenue" resultType="com.itwillbs.clish.admin.dto.RevenueDTO">
+		SELECT
+	  		DATE_FORMAT(FROM_UNIXTIME(pay_time / 1000), '%Y-%m') AS date
+	  		, IFNULL(SUM(amount), 0) AS total
+		FROM
+	  		PAYMENT_INFO
+		WHERE
+	 		status = 'paid'
+	  	AND 
+	  		pay_time >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 12 MONTH)) * 1000
+		GROUP BY
+	 		date
+		ORDER BY
+	 		date ASC
+	</select>
+	
+	<!-- 카테고리별 매출 -->
+	<select id="selectCategoryRevenue" resultType="com.itwillbs.clish.admin.dto.CategoryRevenueDTO">
+   		SELECT
+	        c.category_name AS categoryName,
+	        IFNULL(SUM(p.amount), 0) AS total
+	    FROM
+	        CATEGORY c
+	    LEFT JOIN 
+	    	CATEGORY sub
+	    ON 
+	    	sub.parent_idx = c.category_idx AND sub.depth = 2
+	    LEFT JOIN 
+	    	CLASS cls
+        ON 
+        	cls.category_idx = sub.category_idx
+	    LEFT JOIN 
+	    	RESERVATION r
+        ON 
+        	r.class_idx = cls.class_idx
+	    LEFT JOIN (
+	        SELECT *
+	        FROM PAYMENT_INFO
+	        WHERE status = 'paid'
+	          AND FROM_UNIXTIME(pay_time / 1000, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+	    ) p
+	        ON p.reservation_idx = r.reservation_idx
+	    WHERE
+	        c.depth = 1
+	    GROUP BY
+	        c.category_name
+	</select>
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

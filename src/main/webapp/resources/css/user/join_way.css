@@ -1,0 +1,38 @@
+.join-type-select {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.join-type-select h2 {
+  margin-bottom: 30px;
+  font-size: 24px;
+  color: #333;
+}
+
+.join-type-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.btn-join {
+  display: inline-block;
+  padding: 15px 30px;
+  font-size: 18px;
+  color: #FFFFFF;
+  font-weight: bold;
+  font-family: inherit;
+  text-decoration:none;
+  background-color: #FF8C00;
+  border-radius: 6px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-join:visited {
+  color: #FFFFFF;
+}
+
+.btn-join:hover {
+  background-color: #ff8040;
+  transform: scale(1.05);
+}

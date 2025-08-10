@@ -1,0 +1,65 @@
+:root {
+	--sidebar-width:		220px;
+	--header-height:		100px;
+}
+
+body {
+	margin:				0;
+	padding:			0;
+	box-sizing:			border-box;
+}
+
+#sidebar {
+	position: fixed;
+	top: var(--header-height);   /* header 아래 */
+	left: 0;
+	width: var(--sidebar-width);
+	height: calc(100vh - var(--header-height));
+}
+
+#top-menu {
+	position:			fixed;
+	top:				0;
+	left:				0;
+	width:				100vw;
+	height:				100px;		/* 기존값과 동일 */
+	z-index:			1000;		/* sidebar보다 위에 오게 */
+	background:			#fff;
+	box-shadow:			0 1px 6px rgba(0,0,0,0.05);  /* 필요시 */
+}
+
+.main {
+	padding-left:		var(--sidebar-width);      /* 사이드바만큼 확보 */
+	margin-top:			var(--header-height);      /* 헤더만큼 확보 */
+	padding-top:		40px;                      /* 헤더 아래 여백 */
+	background:			#fff;
+	min-height:			calc(100vh - var(--header-height));
+	display:			flex;
+	flex-direction:		column;
+	align-items:		center;                    /* 중앙정렬 (진짜 핵심) */
+	box-sizing:			border-box;
+}
+
+/* main-content는 폭만 제한, 중앙 정렬! transform 등 X */
+.main-content {
+	width:				100%;
+	margin: 0 auto;
+	max-width:			1100px;
+}
+
+.box {
+	margin-bottom:			24px;
+	display:				flex;
+	justify-content:		flex-end;
+}
+
+.table {
+	width:					90%;
+	margin: 0 auto;
+	border-collapse:		collapse;
+	margin-top:				16px;
+	background:				#faf8fc;
+	border-radius:			14px;
+	overflow:				hidden;
+	box-shadow:				0 2px 10px 0 rgba(255,128,0,0.07);
+}

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.admin.mapper.AdminClassMapper">
+	<!-- 강좌 정보 조회 -->
+	<select id="selectClassList" resultType="map">
+		SELECT
+			c.class_idx
+			, c.class_title
+			, c.class_status
+			, c.created_at
+			, pc.category_name AS parent_category_name
+			, cc.category_name AS child_category_name
+		FROM
+			CLASS c
+		JOIN  
+			CATEGORY cc
+		ON
+			c.category_idx = cc.category_idx
+		LEFT JOIN
+			CATEGORY pc
+		ON
+			cc.parent_idx = pc.category_idx
+		WHERE
+			c.class_status != 1
+		<if test="!searchKeyword.equals('')">
+			AND c.class_title LIKE CONCAT('%', #{searchKeyword}, '%')
+		</if>
+		ORDER BY
+		<choose>
+		    <when test="filter.equals('latest')">
+		        c.created_at DESC
+		        , c.class_status
+		    </when>
+		    <otherwise>
+		        c.class_status
+		    </otherwise>
+		</choose>
+		LIMIT
+			#{startRow}     
+			, #{listLimit} 
+	</select>
+	
+	<select id="selectpendingClassList" resultType="map">
+		SELECT
+			c.class_idx
+			, c.class_title
+			, c.class_status
+			, c.created_at
+			, pc.category_name AS parent_category_name
+			, cc.category_name AS child_category_name
+		FROM
+			CLASS c
+		JOIN  
+			CATEGORY cc
+		ON
+			c.category_idx = cc.category_idx
+		LEFT JOIN
+			CATEGORY pc
+		ON
+			cc.parent_idx = pc.category_idx
+		WHERE
+			c.class_status = 1
+		ORDER BY
+			c.created_at
+	</select>
+	
+	<!-- 등록된 강의 수 (검색기능 포함) -->
+	<select id="selectClassCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			CLASS
+		WHERE
+			class_status != 1
+		<if test="searchKeyword != null and searchKeyword != ''">
+		AND
+			class_title LIKE CONCAT('%', #{searchKeyword}, '%')
+		</if>
+	</select>
+	
+	<!-- 대기 중인 강의 -->
+	<select id="selectPendingClass" resultType="boolean">
+		SELECT 
+			COUNT(*)
+		FROM
+			CLASS
+		WHERE 
+			class_status = #{status}
+	</select>
+	
+	<select id="existsReservationByClassIdx" resultType="boolean">
+		SELECT 
+			COUNT(*) > 0
+		FROM
+			RESERVATION
+		WHERE
+			class_idx = #{classIdx}
+	</select>
+	
+	<!-- 강좌 승인 -->
+	<update id="updateClassStatus">
+		UPDATE
+			CLASS
+		SET
+			class_status = #{status}
+			, created_at = now()
+		WHERE
+			class_idx = #{idx}
+	</update>
+	
+	<!-- 강좌 정보 변경 -->
+	<update id="updateClassInfo">
+		UPDATE
+			CLASS
+		SET
+			class_title = #{classInfo.classTitle}
+			, class_intro = #{classInfo.classIntro}
+			, class_content = #{classInfo.classContent}
+			, category_idx = #{classInfo.categoryIdx}
+			, class_status = #{classInfo.classStatus}
+			, class_price = #{classInfo.classPrice}
+			, class_member = #{classInfo.classMember}
+			, start_date = #{classInfo.startDate}
+			, end_date = #{classInfo.endDate}
+			, class_days = #{classInfo.classDays}
+			, location = #{classInfo.location}
+			, updated_at = now()
+		WHERE
+			class_idx = #{idx}
+	</update>
+	
+	<!-- 카테고리 존재 여부 -->
+	<select id="existsByCategory" resultType="boolean">
+		SELECT COUNT(*) > 0
+		FROM CLASS
+		WHERE 
+		<choose>
+			<when test="depth == 2">
+				category_idx = #{categoryIdx}
+			</when>
+			<when test="depth == 1">
+				category_idx IN (
+					SELECT category_idx FROM CATEGORY WHERE parent_idx = #{categoryIdx}
+				)
+			</when>
+		</choose>
+	</select>
+
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

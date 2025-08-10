@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.common.scheduler.SchedulerMapper">
+
+	<!-- 삭제할 알림 선택 15분마다 -->                               
+	<select id="SelectDeleteReservationList">
+		SELECT *
+		FROM RESERVATION
+		WHERE reservation_status = 1
+		AND NOW() - INTERVAL 2 HOUR >= reservation_com;
+	</select>
+	
+	<!-- 마감된 클래스 검색 15분마다 -->
+	<select id="selectEndClasses" resultType="map">
+		SELECT
+			c.user_idx
+			, c.class_title
+			, DATE_FORMAT(c.end_date, '%Y-%m-%d') AS end_date
+		FROM
+			CLASS c
+		WHERE
+			DATE(c.end_date) = CURDATE()
+		AND
+			NOT EXISTS(
+				SELECT 1
+				FROM
+					NOTIFICATION n
+				WHERE
+					n.user_idx = c.user_idx
+				AND
+					n.user_notice_message LIKE CONCAT('%', c.class_title, '%마감%')
+			)
+	</select>
+	
+	<!-- 3개월 지난 알림 삭제 매일 00시 마다-->
+	<delete id="DeleteNotification">
+		DELETE FROM NOTIFICATION
+		WHERE DATE_SUB(NOW(), INTERVAL 3 MONTH) > user_notice_created_at;
+	</delete>
+	
+	<!-- 이벤트 상태 업데이트 -->
+	<update id="updateAllEventStatus">
+		UPDATE
+			EVENT
+		SET
+			event_in_progress = 
+			CASE
+				WHEN event_in_progress = 0 THEN 0
+				WHEN CURRENT_DATE &lt; event_start_date THEN 2
+				WHEN CURRENT_DATE &gt; event_end_date THEN 0
+				ELSE 1
+			END
+	</update>
+	
+	<select id="selectToStartReservation" resultType="map">
+		SELECT *
+		FROM RESERVATION
+		WHERE reservation_status = 2
+		AND DATE(reservation_class_date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+	</select>
+</mapper>

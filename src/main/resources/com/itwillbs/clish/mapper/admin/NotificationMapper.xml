@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.admin.mapper.NotificationMapper">
+	<!-- 알림 리스트 -->
+	<select id="selectNotifications" resultType="com.itwillbs.clish.admin.dto.NotificationDTO">
+		SELECT *
+		FROM NOTIFICATION
+		WHERE
+			user_idx = #{userIdx}
+		ORDER BY
+			user_notice_created_at DESC
+	</select>
+	
+	<!-- 읽음 상태 변경 -->
+	<update id="updateStatus">
+		UPDATE
+			NOTIFICATION
+		SET
+			user_notice_read_status = 1
+		WHERE 
+			user_idx = #{userIdx}
+		AND
+			notice_idx = #{notiIdx}
+	</update>
+	
+	<!-- 읽지않은 알림 목록 -->
+	<select id="selectUnreadNotifications" resultType="com.itwillbs.clish.admin.dto.NotificationDTO">
+		SELECT *
+		FROM NOTIFICATION
+		WHERE
+			user_idx = #{userIdx}
+		AND
+			user_notice_read_status = 2	
+	</select>
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.course.mapper.UserClassMapper">
+
+	<!-- 예약 정보 등록 INSERT -->
+	<insert id="insertReservation">
+		INSERT
+		INTO RESERVATION 
+		VALUES (
+			#{reservationIdx}
+			, #{userIdx}
+			, #{reservationMembers}
+			, #{reservationClassDate}
+			, now()
+			, #{classIdx}
+			, 1
+		)
+	</insert>
+	
+	<select id="selectReservationCountByDate" resultType="int">
+	    SELECT 
+	    	COUNT(*) 
+	    FROM 
+	    	RESERVATION
+	    WHERE 
+	    	reservation_class_date LIKE CONCAT(#{date}, '%')
+	</select>
+	
+	<!-- 총 예약 인원 확인 SELECT -->
+	<select id="selectCountReservationMembers" resultType="int">
+		SELECT 
+			IFNULL(SUM(reservation_members), 0)
+		FROM 
+			RESERVATION
+		WHERE 
+			class_idx = #{classIdx};
+	</select>
+	
+	<!-- 유저idx SELCT -->
+	<select id="selectUser" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT
+			user_idx
+		FROM
+			USER
+		WHERE
+			user_id = #{userId}
+	</select>
+	
+	<!-- 클래스 정보 조회 SELECT -->
+	<select id="selectClassList" resultType="com.itwillbs.clish.course.dto.ClassDTO">
+		SELECT *
+		FROM 
+			CLASS
+		WHERE 
+			class_type = #{classType}
+		AND
+			class_status > 1	
+		<!-- 카테고리별 정렬 검색조건 -->
+		<if test="categoryIdx != null and categoryIdx != ''">
+		AND
+		category_idx LIKE CONCAT('%', #{categoryIdx}, '%')
+		</if>
+		
+		<if test="searchClassKeyword != null and searchClassKeyword != ''">
+		AND
+		class_title LIKE CONCAT('%', #{searchClassKeyword}, '%')			
+		</if>
+			
+		<if test="searchType != null and searchType != ''">
+			<choose>
+				<!-- 강의 최신 등록순 -->
+				<when test="searchType.equals('최신')">
+					ORDER BY created_at DESC
+				</when>
+				<!-- 높은 가격 순서로 정렬 -->
+				<when test="searchType.equals('높은가격')">
+					ORDER BY class_price DESC
+				</when>
+				<!-- 낮은 가격 순서로 정렬 -->
+				<when test="searchType.equals('낮은가격')">
+					ORDER BY class_price ASC
+				</when>
+			</choose>
+		</if>
+		LIMIT
+			#{startRow}  	-- 조회 시작 레코드(row) 번호
+			, #{listLimit}	-- 조회 갯수 
+	</select>
+	
+	<select id="selectCountClassList" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			CLASS
+		WHERE
+			class_type = #{classType}
+		AND
+			class_status > 1
+		<if test="!searchClassKeyword.equals('')">
+		AND
+			class_title LIKE CONCAT('%', #{searchClassKeyword}, '%')
+		</if>
+		<if test="categoryIdx != null">
+		AND
+			category_idx LIKE CONCAT('%', #{categoryIdx}, '%')
+		</if>
+	</select>
+	
+	<!-- 클래스상세페이지 리뷰 카운트 SELECT -->
+	<select id="selectCountClassReview" resultType="int"> 
+		SELECT 
+			COUNT(*)
+		FROM 
+			REVIEW
+		WHERE 
+			class_idx = #{classIdx}
+	</select>
+	
+	<!-- 클래스상세페이지 리뷰 불러오기 -->
+	<resultMap type="com.itwillbs.clish.myPage.dto.ReviewDTO" id="ReviewDTOListWithfileDTOListResultMap">
+		<id property="reviewIdx" column="review_idx" />
+		<result property="reservationIdx" column="reservation_idx" />
+		<result property="userIdx" column="user_idx" />
+		<result property="classIdx" column="class_idx" />
+		<result property="reviewTitle" column="review_title" />
+		<result property="reviewDetail" column="review_detail" />
+		<result property="reviewScore" column="review_score" />
+		<result property="reviewCreatedAt" column="review_created_at" />
+		<result property="reviewModifiedAt" column="review_modified_at" />
+		<result property="reviewReportedCount" column="review_reported_count" />
+		<result property="classTitle" column="class_title" />
+		<result property="categoryIdx" column="category_idx" />
+		<result property="classType" column="class_type" />
+		<result property="reservationClassDate" column="reservation_class_date" />
+		<result property="userId" column="user_id" />
+		<result property="userName" column="user_name" />
+		
+		<collection property="fileList" ofType="com.itwillbs.clish.common.file.FileDTO"
+		column="review_idx" select="selectFilesByReviewIdx"/>
+	</resultMap>
+	
+	<select id="selectAllClassReview" resultMap="ReviewDTOListWithfileDTOListResultMap">
+		SELECT rev.*,
+				c.class_title,
+				c.category_idx,
+				c.class_type,
+				r.reservation_class_date,
+				u.user_id,
+				u.user_name
+				
+		FROM REVIEW rev
+		LEFT JOIN CLASS c
+			ON rev.class_idx = c.class_idx
+		LEFT JOIN RESERVATION r
+			ON rev.reservation_idx = r.reservation_idx
+		LEFT JOIN USER u
+			ON rev.user_idx = u.user_idx
+		WHERE rev.class_idx = #{classIdx}
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 리뷰idx로 첨부 파일 조회 SELECT -->
+	<select id="selectFilesByReviewIdx" parameterType="String" resultType="com.itwillbs.clish.common.file.FileDTO">
+		SELECT *
+		FROM 
+			FILE
+		WHERE 
+			idx = #{reviewIdx}
+	</select>
+	
+<!-- 	<select id="countByDate" resultType="int"> -->
+<!-- 	    SELECT  -->
+<!-- 	    	SUM(reservation_members)  -->
+<!-- 	    FROM  -->
+<!-- 	    	RESERVATION -->
+<!-- 		WHERE  -->
+<!-- 			DATE(reservation_class_date) like concat('%', #{date} ,'%') -->
+<!-- 		AND  -->
+<!-- 			class_idx = #{classIdx} -->
+<!-- 	</select> -->
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

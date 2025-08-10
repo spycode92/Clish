@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.admin.mapper.AdminUserMapper">
+	<!-- 유저 리스트 -->
+	<select id="selectUserList" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT
+			user_idx
+			, user_id
+			, user_email
+			, user_name
+			, user_phone_number
+			, user_gender
+			, user_reg_date
+			, user_status
+		FROM
+			USER
+		WHERE
+			user_type = 1
+		AND 
+			user_status != 3
+		<if test="!searchKeyword.equals('')">
+		AND 
+			user_name LIKE CONCAT('%', #{searchKeyword}, '%')
+		OR  
+			user_id LIKE CONCAT('%', #{searchKeyword}, '%')
+		</if>
+		ORDER BY
+		<choose>
+		    <when test="filter != null and filter == 'latest'">
+		        user_reg_date DESC
+		    </when>
+		    <when test="filter != null and filter == 'oldest'">
+		        user_reg_date ASC
+		    </when>
+		    <otherwise>
+                user_idx DESC
+            </otherwise>
+		</choose>
+		LIMIT
+			#{startRow}     
+			, #{listLimit} 
+	</select>
+	
+	<!-- 일반 회원 수(검색기능 포함) -->
+	<select id="selectUserListCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			USER
+		WHERE
+			user_type = 1
+		AND user_status != 3
+		<if test="!searchKeyword.equals('')">
+		AND
+			user_name LIKE CONCAT('%', #{searchKeyword}, '%')
+		OR  
+			user_id LIKE CONCAT('%', #{searchKeyword}, '%')
+		</if>
+	</select>
+	
+	<!-- 일반 유저 상세 정보 -->
+	<select id="selectUserInfo" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT
+			user_idx
+			, user_name
+			, user_rep_name
+			, user_id
+			, user_birth
+			, user_phone_number
+			, user_phone_number_sub
+			, user_email
+			, user_gender
+			, user_postcode
+			, user_address1
+			, user_address2
+		FROM
+			USER
+		WHERE
+			user_idx = #{idx}
+	</select>
+
+	<!-- 기업 회원 리스트 -->
+	<select id="selectCompanyList" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT
+			user_idx
+			, user_name
+			, user_id
+			, user_email
+			, user_phone_number
+			, user_reg_date
+			, user_status
+		FROM 
+			USER
+		WHERE
+			user_type = 2
+		AND
+			user_status != 3
+		<if test="!searchKeyword.equals('')">
+		AND user_name LIKE CONCAT('%', #{searchKeyword}, '%')
+		</if>
+		<choose>
+			<when test="filter != null and filter == 'waiting'">
+			AND user_status = 5
+			</when>
+			<when test="filter != null and filter == 'approved'">
+			AND user_status = 1
+			</when>
+		</choose>
+		ORDER BY
+		<choose>
+		    <when test="filter != null and filter == 'latest'">
+		        user_reg_date DESC
+		    </when>
+		    <when test="filter != null and filter == 'oldest'">
+		        user_reg_date ASC
+		    </when>
+		    <when test="filter != null and filter == 'all'">
+		    	user_status DESC
+		    </when>
+		    <otherwise>
+		    	user_reg_date
+		    </otherwise>
+		</choose>
+		LIMIT
+			#{startRow}     
+			, #{listLimit} 
+	</select>
+	
+	<!-- 기업 회원 수(검색기능 포함) -->
+	<select id="selectCompanyListCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			USER
+		WHERE
+			user_type = 2
+		<if test="!searchKeyword.equals('')">
+		AND
+			user_name LIKE CONCAT('%', #{searchKeyword}, '%')
+		</if>
+	</select>
+	
+	<!-- 기업 회원 상세 정보 -->
+	<select id="selectCompanyInfo" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT
+			user_idx
+			, user_name
+			, user_rep_name
+			, user_birth
+			, user_id
+			, user_email
+			, user_phone_number
+			, user_phone_number_sub
+			, user_postcode
+			, user_address1
+			, user_address2
+			, user_status
+		FROM 
+			USER
+		WHERE
+			user_idx = #{idx}
+	</select>
+	
+	<!-- 회원 상태 변경 -->
+	<update id="updateUserStatus">
+		UPDATE 
+			USER
+		SET
+			user_status = #{status}
+			<if test="status == 3">
+			, user_withdraw_date = now()
+			</if>
+		WHERE
+			user_idx = #{idx}
+	</update>
+	
+	<!-- 알림 정보 추가 -->
+	<insert id="insertNotificatoin">
+		INSERT INTO
+			NOTIFICATION
+		VALUES (
+			#{noticeIdx}
+			, #{userIdx}
+			, #{userNoticeType}
+			, #{userNoticeMessage}
+			, now()
+			, 2
+			, #{userNoticeLink}
+		)
+	</insert>
+	
+	<!-- 기업의 사업자등록증 조회 -->
+	<resultMap id="BizRegWithFileDTOListResultMap" type="com.itwillbs.clish.user.dto.CompanyDTO" >
+		<id property="userIdx" column="user_idx"/>
+		<result property="bizRegNo" column="biz_reg_no" />
+		<result property="bizFileName" column="biz_file_name" />
+		<result property="bizFilePath" column="biz_file_path" />
+		<collection property="fileList" ofType="com.itwillbs.clish.common.file.FileDTO">
+			<id property="fileId" column="file_id"/>
+			<result property="idx" column="idx" />
+			<result property="originalFileName"  column="original_file_name"/>
+			<result property="realFileName"  column="real_file_name"/>
+			<result property="subDir"  column="sub_dir"/>
+			<result property="fileSize"  column="file_size"/>
+			<result property="contentType"  column="content_type"/>
+		</collection>
+	</resultMap>
+	<select id="selectCompanyBizReg" resultMap="BizRegWithFileDTOListResultMap">
+		SELECT 
+			c.user_idx
+			, c.biz_reg_no
+			, c.biz_file_name
+			, c.biz_file_path
+		    , f.file_id
+		    , f.original_file_name
+		    , f.real_file_name
+		    , f.sub_dir
+		    , f.file_size
+		    , f.content_type
+		FROM
+			COMPANY c
+		LEFT JOIN FILE f
+		ON c.user_idx = f.idx
+		WHERE c.user_idx = #{idx}
+	</select>
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

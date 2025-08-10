@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.clish.common.emailAuth.EmailAuthMapper">
+
+    <!-- 1. 이메일로 인증 정보 조회 -->
+    <select id="selectByEmail" parameterType="String" resultType="com.itwillbs.clish.common.emailAuth.EmailAuthDTO">
+        SELECT
+            user_email,
+            user_email_token,
+            user_email_token_expire,
+            user_email_auth_yn
+        FROM
+            EMAIL_AUTH
+        WHERE
+            user_email = #{userEmail}
+    </select>
+
+    <!-- 2. 인증 정보 새로 삽입 -->
+    <insert id="insertEmailAuth" parameterType="com.itwillbs.clish.common.emailAuth.EmailAuthDTO">
+        INSERT INTO EMAIL_AUTH (
+            user_email,
+            user_email_token,
+            user_email_token_expire,
+            user_email_auth_yn
+        ) VALUES (
+            #{userEmail},
+            #{userEmailToken},
+            #{userEmailTokenExpire},
+            #{userEmailAuthYn}
+        )
+    </insert>
+
+    <!-- 3. 인증 정보 갱신 -->
+    <update id="updateEmailAuth" parameterType="com.itwillbs.clish.common.emailAuth.EmailAuthDTO">
+        UPDATE EMAIL_AUTH
+        SET
+            user_email_token = #{userEmailToken},
+            user_email_token_expire = #{userEmailTokenExpire},
+            user_email_auth_yn = #{userEmailAuthYn}
+        WHERE
+            user_email = #{userEmail}
+    </update>
+
+    <!-- 4. 토큰으로 인증 정보 조회 -->
+    <select id="selectByToken" parameterType="String" resultType="com.itwillbs.clish.common.emailAuth.EmailAuthDTO">
+        SELECT
+            user_email,
+            user_email_token,
+            user_email_token_expire,
+            user_email_auth_yn
+        FROM
+            EMAIL_AUTH
+        WHERE
+            user_email_token = #{token}
+    </select>
+
+    <!-- 5. 인증 성공 처리 (auth_yn → 'Y') -->
+    <update id="updateAuthYn" parameterType="String">
+        UPDATE EMAIL_AUTH
+        SET user_email_auth_yn = 'Y'
+        WHERE user_email = #{userEmail}
+    </update>
+	
+	<select id="emailAuthYN" parameterType="String" resultType="Boolean">
+	    SELECT
+	        user_email_auth_yn
+	    FROM
+	        EMAIL_AUTH
+	    WHERE
+	        user_email = #{email}
+	    ORDER BY
+	        created_at DESC
+	    LIMIT 1
+	</select>
+	
+	
+</mapper>

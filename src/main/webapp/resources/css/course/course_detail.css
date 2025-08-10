@@ -1,0 +1,215 @@
+@charset "UTF-8";
+/* 컨테이너 기본 구조 */
+.class-details {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background-color: #ffffff;
+}
+
+/* 썸네일 영역 */
+.cls-pic {
+  flex: 1;
+  text-align: center;
+}
+.cls-pic img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* 강의 제목, 소개 */
+.cls-info-card {
+  flex: 1;
+  padding: 20px 30px;
+}
+.class-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.class-description {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* 태그 스타일 */
+.class-tags {
+  margin-top: 15px;
+}
+.tag {
+  display: inline-block;
+  background-color: #f0f0f0;
+  color: #333;
+  font-size: 0.9rem;
+  padding: 5px 10px;
+  margin-right: 8px;
+  border-radius: 20px;
+}
+
+ul.tabnav li {
+	border: none;
+	background-color: white;
+	box-shadow:inherit;
+}
+
+#classDetail {
+	padding: 40px 20px;
+	height: auto;
+}
+
+/* 섹션 영역 */
+.section-container {
+  padding: 40px 20px;
+}
+
+/* 커리큘럼 */
+#curriCulum {
+	margin-bottom: 20px;
+}
+
+.curriculum-box {
+  background-color: #f9f9f9;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  border-left: 5px solid #ff6b00;
+  border-radius: 5px;
+}
+
+/* 리뷰 테이블 */
+#reView table {
+  width: 100%;
+  margin-top: 30px;
+  border-collapse: collapse;
+}
+#reView th, #reView td {
+  padding: 12px;
+  border: 1px solid #ddd;
+}
+#reView th {
+  background-color: #f0f0f0;
+  text-align: left;
+}
+
+/* 별점 */
+.star-rating .star {
+  font-size: 24px;
+  color: #ccc;
+}
+.star-rating .star.active {
+  color: gold;
+}
+
+/* 이미지 썸네일 */
+.img-thumb {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+.img-thumb:hover {
+  transform: scale(1.1);
+}
+
+/* 모달 이미지 */
+#imgModal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  text-align: center;
+}
+#imgModal img {
+  max-width: 90vw;
+  max-height: 90vh;
+  margin-top: 5vh;
+  border: 3px solid #fff;
+  border-radius: 6px;
+}
+
+/* 환불 규정 섹션 전체 */
+#refund {
+  border-radius: 10px;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* 타이틀 */
+#refund h1 {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* 소제목 */
+#refund b {
+  display: inline-block;
+  font-size: 1.1rem;
+  color: #333;
+  background-color: #ffe7c2;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+/* 규정 텍스트 */
+#refund br + br {
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* 규정 항목들 */
+#refund br::after {
+  content: '';
+  display: block;
+  margin-bottom: 5px;
+}
+
+.tabnav {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 10px 0;
+  border-bottom: 2px solid #eee;
+  background-color: #fff;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabnav li {
+  width: 120px;
+  list-style: none;
+}
+
+.tabnav li a {
+  display: inline-block;
+  font-size: 1rem;
+  color: #333;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.tabnav li a:hover,
+.tabnav li a.active {
+  border-bottom: 3px solid #ff6b00;
+  color: #ff6b00;
+}
+
+#classDetail {
+	margin-bottom: 20px;
+}

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.admin.mapper.AdminEventMapper">
+	<!-- 이벤트 리스트 -->
+	 <select id="selectAllEvent" resultType="com.itwillbs.clish.admin.dto.EventDTO">
+	 	SELECT *
+	 	FROM 
+	 		EVENT
+	 	WHERE 1 = 1
+	 		<if test="searchType == '진행중'">
+	 		AND event_in_progress = 1
+	 		</if>
+	 		<if test="searchType == '예정'">
+	 		AND event_in_progress = 2
+	 		</if>
+	 		<if test="searchType == '종료'">
+	 		AND event_in_progress = 0
+	 		</if>
+	 		 <if test="searchKeyword != null and searchKeyword != ''">
+	 		AND event_title LIKE CONCAT('%', #{searchKeyword}, '%') 
+	 		</if>
+	 	ORDER BY
+	 		event_in_progress DESC
+	 	LIMIT
+			#{startRow}
+			, #{listLimit}
+	 </select>
+	 
+	 <!-- 이벤트 게시물 수  -->
+	 <select id="selectCountEvent" resultType="int">
+	 	SELECT 
+	 		COUNT(*)
+	 	FROM 
+	 		EVENT
+	 	WHERE
+	 		<choose>
+			<when test="searchType == '진행중'">
+			event_in_progress = 1
+			</when>
+			<when test="searchType == '예정'">
+			event_in_progress = 2
+			</when>
+			<when test="searchType == '종료'">
+			event_in_progress = 0
+			</when>
+			<when test="searchKeyword != null and searchKeyword != ''">
+			event_title LIKE CONCAT('%', #{searchKeyword}, '%')
+			</when>
+			<otherwise>
+			1 = 1
+			</otherwise>
+			</choose>
+	 </select>
+	 
+	<!-- 이벤트 등록 -->
+	<insert id="insertEvent">
+		INSERT
+		INTO
+			EVENT
+		VALUES (
+			#{eventIdx}
+			, #{eventTitle}
+			, #{eventDescription}
+			, #{eventStartDate}
+			, #{eventEndDate}
+			, 2
+			, now()
+		)
+	</insert>
+	
+	<!-- 이벤트 상세 -->
+	<select id="selectEvent" resultType="com.itwillbs.clish.admin.dto.EventDTO">
+		SELECT *
+		FROM 
+			EVENT
+		WHERE
+			event_idx = #{idx}
+	</select>
+	
+	<!-- 이벤트 수정 -->
+	<update id="updateEvent">
+		UPDATE
+			EVENT
+		SET
+			event_title = #{eventTitle}
+			, event_description = #{eventDescription}
+			, event_start_date = #{eventStartDate}
+			, event_end_date = #{eventEndDate}
+			, event_in_progress = #{eventInProgress}
+		WHERE
+			event_idx = #{eventIdx}
+	</update>
+	
+	<!-- 이벤트 삭제 -->
+	<delete id="deletedEvent">
+		DELETE
+		FROM
+			EVENT
+		WHERE
+			event_idx = #{idx}
+	</delete>
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

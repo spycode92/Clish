@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.itwillbs.clish.myPage.mapper.MyPageMapper">
+
+	<!-- 유저 정보 불러오기 -->
+	<select id="selectUserInfo" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT *
+		FROM USER
+		WHERE user_id = #{userId}
+	</select>
+	<!-- 유저 프로필사진정보 -->
+	<select id="selectUserProfileImg" resultType="com.itwillbs.clish.common.file.FileDTO">
+		SELECT *
+		FROM FILE
+		WHERE idx = #{userIdx}
+	</select>
+	<!-- 닉네임 중복 체크 -->
+	<select id="checkRepName" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT *
+		FROM USER
+		WHERE user_rep_name = #{userRepName}
+	</select>
+	<!-- 핸드폰 중복 체크 -->
+	<select id="checkPhoneNumber" resultType="com.itwillbs.clish.user.dto.UserDTO">
+		SELECT *
+		FROM USER
+		WHERE user_phone_number = #{userPhoneNumber}
+	</select>
+	
+	<!--  유저정보 수정 -->
+	<update id="updateUserInfo">
+		UPDATE USER
+		SET
+			user_name = #{userName},
+			user_password = #{userPassword},
+			user_rep_name = #{userRepName},
+			<if test="newEmail != null and newEmail != ''">
+			user_email = #{newEmail},
+			</if>
+			user_birth = #{userBirth},
+			user_gender = #{userGender},
+			user_phone_number = #{userPhoneNumber},
+			user_Phone_number_sub = #{userPhoneNumberSub},
+			user_postcode = #{userPostcode},
+			user_address1 = #{userAddress1},
+			user_address2 = #{userAddress2}
+		WHERE
+			user_id = #{userId}
+	</update>
+	
+	<!-- 예약목록 카운트 -->
+	<select id="selectReservationCount" resultType="int">
+		SELECT COUNT(*)
+		FROM RESERVATION
+		WHERE user_idx = #{userIdx}
+	</select>
+	
+	<!-- 결제목록 카운트 -->
+	<select id="selectPaymentCount" resultType="int">
+		SELECT COUNT(*)
+		FROM PAYMENT_INFO
+		WHERE reservation_idx IN
+			(SELECT reservation_idx
+				FROM RESERVATION
+				WHERE user_idx = #{userIdx}	)
+	</select>
+	
+	<!-- 취소할 예약정보 선택 -->
+	<!-- 결제되지않은 것중 예약완료후 2시간 초과된것 -->
+	<select id="selectCancel" resultType="Map"> 
+		SELECT
+			r.reservation_idx as reservationIdx
+			, r.user_idx as userIdx
+			, r.reservation_members as reservationMembers
+			, r.reservation_class_date as reservationClassDate
+			, r.reservation_com as reservationCom
+			, r.reservation_status as reservationStatus
+			, c.class_title as classTitle
+			, c.start_date as startDate
+			, c.end_date as endDate
+			, c.class_type as classType
+		FROM 
+			RESERVATION r
+		LEFT JOIN
+			CLASS c
+			ON r.class_idx = c.class_idx
+		WHERE
+			r.user_idx = #{userIdx}
+			AND
+			r.reservation_status = 1
+			AND (
+				NOW() - INTERVAL 2 HOUR > r.reservation_com 
+				OR 
+				NOW() - INTERVAL 1 DAY > r.reservation_class_date
+			)
+	</select>
+	
+	<!-- 예약정보 삭제 -->
+	<delete id="deleteReservation">
+	DELETE FROM
+		RESERVATION
+	WHERE
+		reservation_idx = #{reservationIdx}
+	</delete>
+	
+	<!-- 예약정보 불러오기 -->
+	<select id="selectAllReservationInfo" resultType="com.itwillbs.clish.myPage.dto.ReservationDTO">
+		SELECT 
+			r.*
+			, c.class_title
+		FROM 
+			RESERVATION r
+		LEFT JOIN
+			CLASS c
+		ON c.class_idx = r.class_idx
+		WHERE
+			r.user_idx = #{user.userIdx}
+		ORDER BY 
+			(r.reservation_status = 1) DESC, ${reservationOrderBy} ${reservationOrderDir}
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 결제정보 조회 -->
+	<select id="selectAllPaymentInfo" resultType="com.itwillbs.clish.myPage.dto.PaymentInfoDTO"> 
+		SELECT
+			p. *,
+			r.reservation_class_date
+		FROM
+			RESERVATION r
+		JOIN
+			PAYMENT_INFO p ON r.reservation_idx = p.reservation_idx
+		WHERE
+			r.user_idx = #{user.userIdx}
+		ORDER BY
+			${paymentOrderBy} ${paymentOrderDir}
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<select id="selectReservationDetail" resultType="com.itwillbs.clish.myPage.dto.ReservationDTO">
+		SELECT *
+		FROM RESERVATION
+		WHERE reservation_idx = #{reservationIdx}
+	</select>
+	
+	<!-- 예약상세정보 종합 불러오기 -->
+	<select id="ReservationDetailInfo" resultType="map">
+	SELECT
+		r.class_idx
+		, c.class_type
+		, c.class_days
+		, c.class_title
+		, c.class_price
+		, c.class_member
+		, c.start_date
+		, c.end_date
+		, c.class_days
+		, f.file_id
+		, f.sub_dir
+		, f.real_file_name
+		, f.original_file_name
+		, r.reservation_idx
+		, r.user_idx
+		, r.reservation_class_date
+		, r.reservation_com
+		, r.reservation_members
+		, r.reservation_status
+		, (c.class_member - IFNULL(
+		  (	SELECT 
+				SUM(r2.reservation_members)
+			FROM 
+				RESERVATION r2
+			WHERE
+				r2.class_idx = c.class_idx
+				AND
+				r2.reservation_class_date = #{reservationClassDate}				
+		  ), 0)) AS remainSeats
+	FROM
+		RESERVATION r
+	JOIN
+		CLASS c
+	ON
+		c.class_idx = r.class_idx
+	LEFT JOIN
+		FILE f
+	ON
+		r.class_idx = f.idx
+	WHERE
+		r.reservation_idx = #{reservationIdx}	
+	</select>
+	
+	<!-- 예약수정 남은자리 불러오기 -->
+	<select id="selectRemainSeats" resultType="int">
+		SELECT DISTINCT
+		c.class_member - IFNULL((
+			SELECT 
+				SUM(r2.reservation_members)
+			FROM 
+				RESERVATION r2
+			WHERE
+				r2.class_idx = c.class_idx
+				AND
+				r2.reservation_class_date = #{reservationClassDate} ), 0) AS remainSeats
+	FROM
+		CLASS c
+	LEFT JOIN
+		RESERVATION r
+	ON
+		c.class_idx = r.class_idx
+	WHERE
+		c.class_idx = #{classIdx}	
+	</select>
+	
+	<!-- 예약상세정보불러오기 -->
+	<select id="selectOneReservationInfo" resultType="com.itwillbs.clish.myPage.dto.ReservationDTO">
+		SELECT *
+		FROM
+			RESERVATION
+		WHERE
+			reservation_idx = #{reservationIdx}
+	</select>
+	
+	<!-- 예약정보 수정 -->
+	<update id="updateReservationInfo">
+		UPDATE RESERVATION
+		set
+			reservation_class_date = #{reservationClassDate}
+			, reservation_members = #{reservationMembers}
+			, reservation_com = now()
+		WHERE
+			reservation_idx = #{reservationIdx}
+	</update>
+	
+	<!-- 탈퇴 처리 -->
+	<update id="withdraw">
+		UPDATE USER
+		SET
+			user_status = 3
+			, user_withdraw_date = now()			
+		WHERE
+			user_idx = #{userIdx}
+	</update>
+	
+	<!-- 강의문의 수 -->
+	<select id="selectCountClassQ" resultType="int">
+		SELECT COUNT(*)
+		FROM INQUERY
+		WHERE user_idx = #{userIdx}
+			AND inquery_type = 2
+	</select>
+	
+	<!-- 내가문의한 강의문의리스트 -->
+	<select id="selectAllClassQ" resultType="com.itwillbs.clish.myPage.dto.InqueryDTO">
+		SELECT I.*, C.class_title
+		FROM INQUERY I
+		JOIN CLASS C ON I.class_idx = C.class_idx
+		WHERE I.user_idx = #{user.userIdx}
+			AND I.inquery_type = 2
+		ORDER BY I.inquery_status, I.${classQOrderBy} ${classQOrderDir}
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+
+	<!-- 내가한 사이트 문의 수 -->
+	<select id="selectCountInquery" resultType="int">
+		SELECT COUNT(*)
+		FROM INQUERY
+		WHERE user_idx = #{userIdx}
+			AND inquery_type = 1
+	</select>
+	
+	<!-- 내가한 사이트문의 목록 -->
+	<select id="selectAllInquery" resultType="com.itwillbs.clish.myPage.dto.InqueryDTO">
+		SELECT *
+		FROM INQUERY
+		WHERE user_idx = #{user.userIdx}
+			AND inquery_type = 1
+		ORDER BY inquery_status, ${inqueryOrderBy} ${inqueryOrderDir}
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 문의 상세정보별 파일 정보를 가져오기위해 resultMap 작성 -->
+	<resultMap type="com.itwillbs.clish.myPage.dto.InqueryDTO" id="InqueryDTOWithfileDTOListResultMap">
+		<id property="inqueryIdx" column="inquery_idx" />
+		<result property="userIdx" column="user_idx" />
+		<result property="inqueryTitle" column="inquery_title" />
+		<result property="inqueryDetail" column="inquery_detail" />
+		<result property="inqueryAnswer" column="inquery_answer" />
+		<result property="classIdx" column="class_idx" />
+		<result property="inqueryType" column="inquery_type" />
+		<result property="inqueryDatetime" column="inquery_datetime" />
+		<result property="inqueryAnswerDatetime" column="inquery_answer_datetime" />
+		<result property="inqueryModifyDatetime" column="inquery_modify_datetime" />
+		<result property="inqueryStatus" column="inquery_status" />
+		<result property="classTitle" column="class_title" />
+		
+		<collection property="fileList" ofType="com.itwillbs.clish.common.file.FileDTO">
+			<id property="fileId" column="file_id" />
+			<result property="idx" column="idx" />
+			<result property="originalFileName" column="original_file_name" />
+			<result property="realFileName" column="real_file_name" />
+			<result property="subDir" column="sub_dir" />
+			<result property="fileSize" column="file_size" />
+			<result property="contentType" column="content_type" />
+		</collection>
+	</resultMap>
+	<!-- 내가한 문의 상세정보 -->
+	<select id="selectOneInquery" resultMap="InqueryDTOWithfileDTOListResultMap">
+		SELECT
+			i.inquery_idx,
+			i.user_idx,
+			i.inquery_title,
+			i.inquery_detail,
+			i.inquery_answer,
+			i.class_idx,
+			i.inquery_type,
+			i.inquery_datetime,
+			i.inquery_answer_datetime,
+			i.inquery_modify_datetime,
+			i.inquery_status,
+			c.class_title,
+			f.file_id,
+			f.original_file_name,
+			f.real_file_name,
+			f.sub_dir,
+			f.file_size,
+			f.content_type
+		FROM INQUERY i
+		LEFT JOIN CLASS c ON i.class_idx = c.class_idx
+		LEFT JOIN FILE f
+		ON i.inquery_idx = f.idx
+		WHERE i.inquery_idx = #{inqueryIdx}
+	</select>
+	
+	<!-- 문의 수정 -->
+	<update id="updateInquery">
+		UPDATE INQUERY
+		SET
+			inquery_title = #{inqueryTitle}
+			, inquery_detail = #{inqueryDetail}
+			, inquery_modify_datetime = now()
+		WHERE
+			inquery_idx = #{inqueryIdx}
+	</update>
+	
+	<!-- 문의 삭제 -->
+	<delete id="deleteInquery">
+		DELETE
+		FROM INQUERY
+		WHERE inquery_idx = #{inqueryIdx}
+	</delete>
+	
+	
+	<!-- 알림수 확인 -->
+	<select id="selectCountNotification" resultType="int">
+		SELECT count(*)
+		FROM NOTIFICATION
+		WHERE user_idx = #{userIdx}
+	</select>
+	
+	<!-- 알림 리스트 불러오기 -->
+	<select id="selectAllNotification" resultType="com.itwillbs.clish.admin.dto.NotificationDTO">
+		SELECT *
+		FROM NOTIFICATION
+		WHERE user_idx = #{user.userIdx}
+		ORDER BY user_notice_created_at desc
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 작성 가능 수강후기 수 -->
+	<select id="selectUncompleteReviewCount" resultType="int">
+		SELECT count(*)
+		FROM RESERVATION r
+		LEFT JOIN REVIEW rev 
+			ON r.reservation_idx = rev.reservation_idx
+		WHERE r.user_idx = #{userIdx}
+			AND r.reservation_status = 2
+			AND CURDATE() >= r.reservation_class_date -- 예약한 날짜가 오늘이거나 과거일때
+			AND rev.reservation_idx IS NULL 
+	</select>
+	
+	<!-- 작성 가능 수강후기 목록 -->
+	<select id="selectAllUncompleteReview" resultType="map">
+		SELECT r.*,
+				c.class_title,
+				c.category_idx,
+				c.class_type
+		FROM RESERVATION r
+		LEFT JOIN CLASS c
+			ON r.class_idx = c.class_idx
+		LEFT JOIN REVIEW rev 
+			ON r.reservation_idx = rev.reservation_idx
+		WHERE r.user_idx = #{user.userIdx}
+			AND r.reservation_status = 2
+			AND CURDATE() >= r.reservation_class_date
+			AND rev.reservation_idx IS NULL
+		ORDER BY
+			r.reservation_class_date
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!--  작성한 수강후기 수 -->
+	<select id="selectCompleteReviewCount" resultType="int">
+		SELECT count(*)
+		FROM RESERVATION r
+		INNER JOIN REVIEW rev -- reservation_idx 가 null이면 카운트하지않음
+			ON r.reservation_idx = rev.reservation_idx
+		WHERE r.user_idx = #{userIdx}
+			AND r.reservation_status = 2
+			AND CURDATE() >= r.reservation_class_date -- 예약한 날짜가 오늘이거나 과거일때
+		
+	</select>
+	
+	<!-- 수강 후기별 후기사진을 보기위해 rseultMap 작성 -->
+	<resultMap type="com.itwillbs.clish.myPage.dto.ReviewDTO" id="ReviewDTOListWithfileDTOListResultMap">
+		<id property="reviewIdx" column="review_idx" />
+		<result property="reservationIdx" column="reservation_idx" />
+		<result property="userIdx" column="user_idx" />
+		<result property="classIdx" column="class_idx" />
+		<result property="reviewTitle" column="review_title" />
+		<result property="reviewDetail" column="review_detail" />
+		<result property="reviewScore" column="review_score" />
+		<result property="reviewCreatedAt" column="review_created_at" />
+		<result property="reviewModifiedAt" column="review_modified_at" />
+		<result property="reviewReportedCount" column="review_reported_count" />
+		<result property="classTitle" column="class_title" />
+		<result property="categoryIdx" column="category_idx" />
+		<result property="classType" column="class_type" />
+		<result property="reservationClassDate" column="reservation_class_date" />
+		<result property="userId" column="user_id" />
+		<result property="userName" column="user_name" />
+		<!-- 수강후기를 먼저 SELECT한후 SELECT된 reviewIdx를 이용해서 각각의 file정보 불러옴 -->
+		<collection property="fileList" ofType="com.itwillbs.clish.common.file.FileDTO"
+		column="review_idx" select="selectFilesByReviewIdx"/>
+	</resultMap>
+	
+	<!-- 선택된 reviewIdx를 이요하여 각 리뷰별 파일을 찾을 SELECT문  -->
+	<select id="selectFilesByReviewIdx" parameterType="String" resultType="com.itwillbs.clish.common.file.FileDTO">
+		SELECT *
+		FROM FILE
+		WHERE idx = #{reviewIdx}
+	</select>
+	<!-- 작성 완료한 수강후기 목록 -->
+	<select id="selectAllCompleteReview" resultMap="ReviewDTOListWithfileDTOListResultMap">
+		SELECT rev.*,
+				c.class_title,
+				c.category_idx,
+				c.class_type,
+				r.reservation_class_date,
+				u.user_id,
+				u.user_name
+				
+		FROM REVIEW rev
+		LEFT JOIN CLASS c
+			ON rev.class_idx = c.class_idx
+		LEFT JOIN RESERVATION r
+			ON rev.reservation_idx = r.reservation_idx
+		LEFT JOIN USER u
+			ON rev.user_idx = u.user_idx
+		WHERE 
+			rev.user_idx = #{user.userIdx}
+		ORDER BY
+			GREATEST(updated_at, created_at) DESC
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 예약, 예약된 클래스 정보 -->
+	<select id="selectOneReservationClassInfo" resultType="map">
+		SELECT r.*,
+			   c.class_title
+		FROM RESERVATION r
+		LEFT JOIN CLASS c
+			ON r.class_idx = c.class_idx
+		WHERE
+			r.reservation_idx = #{reservationIdx}
+	</select>
+	
+	<!-- 후기 작성 -->	
+	<insert id="insertReview">
+		INSERT INTO REVIEW (
+		    review_idx,
+		    reservation_idx,
+		    user_idx,
+		    class_idx,
+		    review_title,
+		    review_detail,
+		    review_score,
+		    review_created_at,
+		    review_reported_count
+		  ) VALUES (
+		  	#{reviewIdx},
+		    #{reservationIdx},
+		    #{userIdx},
+		    #{classIdx},
+		    #{reviewTitle},
+		    #{reviewDetail},
+		    #{reviewScore},
+		    NOW(),
+		    DEFAULT
+		    )
+	</insert>
+	
+	<!-- 후기삭제 -->
+	<delete id="delteReview">
+		DELETE
+		FROM REVIEW
+		WHERE
+			review_idx = #{reviewIdx}
+	</delete>
+	
+	<!-- 후기수정시 첨부된 파일정보를 불러오기 우한 resultMap -->
+	<resultMap type="com.itwillbs.clish.myPage.dto.ReviewDTO" id="ReviewDTOWithfileDTOListResultMap">
+		<id property="reviewIdx" column="review_idx" />
+		<result property="reservationIdx" column="reservation_idx" />
+		<result property="userIdx" column="user_idx" />
+		<result property="classIdx" column="class_idx" />
+		<result property="reviewTitle" column="review_title" />
+		<result property="reviewDetail" column="review_detail" />
+		<result property="reviewScore" column="review_score" />
+		<result property="reviewCreatedAt" column="review_created_at" />
+		<result property="reviewModifiedAt" column="review_modified_at" />
+		<result property="reviewReportedCount" column="review_reported_count" />
+		<result property="classTitle" column="class_title" />
+		<result property="categoryIdx" column="category_idx" />
+		<result property="classType" column="class_type" />
+		<result property="reservationClassDate" column="reservation_class_date" />
+		<result property="userId" column="user_id" />
+		<result property="userName" column="user_name" />
+		
+		<collection property="fileList" ofType="com.itwillbs.clish.common.file.FileDTO">
+			<id property="fileId" column="file_id" />
+			<result property="idx" column="idx" />
+			<result property="originalFileName" column="original_file_name" />
+			<result property="realFileName" column="real_file_name" />
+			<result property="subDir" column="sub_dir" />
+			<result property="fileSize" column="file_size" />
+			<result property="contentType" column="content_type" />
+		</collection>
+	</resultMap>
+	
+	<!-- 수정할 후기 정보 -->
+	<select id="selectOneReview" resultMap="ReviewDTOWithfileDTOListResultMap">
+		SELECT rev.*,
+			r.reservation_class_date,
+			c.class_title,
+			f.file_id,
+			f.original_file_name,
+			f.real_file_name,
+			f.sub_dir,
+			f.file_size,
+			f.content_type
+		FROM REVIEW rev
+		LEFT JOIN RESERVATION r
+			ON rev.reservation_idx = r.reservation_idx
+		LEFT JOIN CLASS c
+			ON rev.class_idx = c.class_idx 
+		LEFT JOIN FILE f
+			ON rev.review_idx = f.idx
+		WHERE
+			review_idx = #{reviewIdx}
+	</select>
+	
+	<!-- 후기 수정 요청 -->
+	<update id="updateReview">
+		UPDATE REVIEW 
+		SET
+			review_title = #{reviewTitle},
+			review_detail = #{reviewDetail},
+			review_score = #{reviewScore},
+			review_modified_at = NOW()
+		WHERE
+			review_idx = #{reviewIdx}  
+	</update>
+	
+	<!--  최근예약목록수 -->
+	<select id="countRecentReservationCount" resultType="int">
+		SELECT count(*)
+		FROM RESERVATION r
+		WHERE
+			r.reservation_status = 1
+			AND
+			r.user_idx = #{userIdx}
+	</select>
+	
+	<!-- 최근예약목록불러오기 : 마이페이지 메인 -->
+	<select id="selectRecentReservation" resultType="Map">
+		SELECT 
+			r.*
+			, c.class_title
+		FROM 
+			RESERVATION r
+		LEFT JOIN
+			CLASS c
+		ON c.class_idx = r.class_idx
+		WHERE
+			r.reservation_status = 1
+			AND
+			r.user_idx = #{user.userIdx}
+		ORDER BY 
+			(r.reservation_status = 1) DESC, r.reservation_class_date DESC
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 최근 1:1문의 답변 수 -->
+	<select id="countRecentSiteInqueryCount" resultType="int">
+		SELECT count(*)
+		FROM INQUERY
+		WHERE
+			inquery_type = 1
+			AND
+			inquery_status = 2
+			AND
+			user_idx = #{userIdx}
+			AND 
+			inquery_answer_datetime >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+	</select>
+	
+	<!-- 최근 1:1문의 답변 목록  -->
+	<select id="selectRecentSiteInquery" resultType="Map">
+		SELECT *
+		FROM INQUERY
+		WHERE 
+			user_idx = #{user.userIdx}
+			AND 
+			inquery_type = 1
+			AND
+			inquery_status = 2
+			AND 
+			inquery_datetime >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 최근 강의문의 답변 수 -->
+	<select id="countRecentClassInqueryCount" resultType="int">
+		SELECT count(*)
+		FROM INQUERY
+		WHERE
+			inquery_type = 2
+			AND
+			inquery_status = 2
+			AND
+			user_idx = #{userIdx}
+			AND 
+			inquery_datetime >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+	</select>
+	
+	<!-- 최근 강의문의 답변 목록  -->
+	<select id="selectRecentClassInquery" resultType="Map">
+		SELECT 
+			i.*
+			, c.class_title 
+		FROM INQUERY i
+		LEFT JOIN CLASS c
+			ON
+			c.class_idx = i.class_idx
+		WHERE 
+			i.user_idx = #{user.userIdx}
+			AND 
+			i.inquery_type = 2
+			AND
+			i.inquery_status = 2
+			AND 
+			i.inquery_datetime >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

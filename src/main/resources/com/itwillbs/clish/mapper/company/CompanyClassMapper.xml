@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.course.mapper.CompanyClassMapper">
+	
+	<!-- 강의 등록 -->
+	<insert id="insertCompanyClass">
+	    INSERT INTO CLASS (
+	    	class_idx,
+	        class_title,
+	        category_idx,
+	        class_status,
+	        class_price,
+	        class_member,
+	        start_date,
+	        end_date,
+	        class_days,
+	        location,
+	        created_at,
+	        updated_at,
+	        user_idx,
+	        class_type,
+	        class_intro,
+	        class_content
+	    )
+	    VALUES (
+	        #{classIdx},
+	        #{classTitle},
+	        #{categoryIdx},
+	        #{classStatus},
+	        #{classPrice},
+	        #{classMember},
+	        #{startDate},
+	        #{endDate},
+	        #{classDays},
+	        #{location},
+	        now(),
+			null,
+			#{userIdx},
+	        #{classType},
+	        #{classIntro},
+	        #{classContent}
+	    )
+	</insert>
+	
+	<!-- 로그인된 userId를 기반으로 해당 회원의 고유 userIdx 반환(기업회원 식별용) -->
+	<select id="selectUserIdxByUserId" parameterType="String" resultType="String">
+		SELECT USER_IDX
+		FROM USER
+		WHERE USER_ID = #{userId}
+	</select>
+	
+	<!-- 클래스별 예약된 인원 수 확인 -->
+	<select id="selectReservedCountByClassIdx" resultType="int">
+		SELECT COUNT(*)
+		FROM
+			RESERVATION
+		WHERE
+			CLASS_IDX = #{classIdx}
+	</select>
+	
+	<!-- 전체강의 조회 -->
+	<select id="selectAllClassList" resultType="map">
+	    SELECT 
+	        C.*, 
+	        PC.CATEGORY_NAME AS parent_category_name, 
+	        CC.CATEGORY_NAME AS child_category_name
+	    FROM CLASS C
+	    JOIN CATEGORY CC ON C.CATEGORY_IDX = CC.CATEGORY_IDX
+	    LEFT JOIN CATEGORY PC ON CC.PARENT_IDX = PC.CATEGORY_IDX
+	    WHERE C.USER_IDX = #{userIdx}
+	    AND C.CLASS_STATUS IN (1, 2, 3)
+	</select>
+	
+	<!-- 단기 & 정기강의 조회 -->
+	<select id="selectClassListByType" parameterType="map" resultType="map">
+	    SELECT 
+	        C.*, 
+	        PC.CATEGORY_NAME AS parent_category_name, 
+	        CC.CATEGORY_NAME AS child_category_name
+	    FROM CLASS C
+	    JOIN CATEGORY CC ON C.CATEGORY_IDX = CC.CATEGORY_IDX
+	    LEFT JOIN CATEGORY PC ON CC.PARENT_IDX = PC.CATEGORY_IDX
+		<where>
+			C.USER_IDX = #{userIdx}
+			AND C.CLASS_STATUS IN (1, 2, 3)
+		  
+			<if test="type == 'short'">
+				AND <![CDATA[Datediff(C.END_DATE, C.START_DATE) = 0]]>
+			</if>
+		 
+			<if test="type == 'regular'">
+				AND <![CDATA[Datediff(C.END_DATE, C.START_DATE) >= 1]]>
+			</if>
+		</where>
+	</select>
+	
+	<!-- 클래스 수정 -->
+	<update id="updateClassInfo">
+		UPDATE
+			CLASS
+		SET
+			class_title = #{classInfo.classTitle}
+			, category_idx = #{classInfo.categoryIdx}
+			, class_status = #{classInfo.classStatus}
+			, class_price = #{classInfo.classPrice}
+			, class_member = #{classInfo.classMember}
+			, start_date = #{classInfo.startDate}
+			, end_date = #{classInfo.endDate}
+			, class_days = #{classInfo.classDays}
+			, location = #{classInfo.location}
+			, class_intro = #{classInfo.classIntro}
+			, class_content = #{classInfo.classContent}
+			, updated_at = now()
+		WHERE
+			class_idx = #{classInfo.classIdx}
+	</update>
+	
+	<!-- 클래스 삭제 -->
+	<delete id="deleteClass">
+	    DELETE
+		FROM CLASS
+	    WHERE
+			class_idx = #{classIdx}
+	</delete>
+	
+	<!-- 클래스 예약자 목록 조회 - 이름, 전화번호 조인해서 조회 -->
+	<select id="selectReservationList" resultType="map">
+		SELECT
+			u.user_name AS name,                -- 회원 이름
+			u.user_phone_number AS phone        -- 대표 전화번호
+		FROM RESERVATION r
+		JOIN USER u ON r.user_idx = u.user_idx
+		WHERE
+			r.class_idx = #{classIdx}
+	</select>
+
+	<!-- 클래스 문의 페이지 - 문의 리스트 -->
+	<resultMap id="inquiryJoinUserMap" type="com.itwillbs.clish.admin.dto.InquiryJoinUserDTO">
+		<id property="inquiry.inqueryIdx" column="inquery_idx"/>
+		<result property="classIdx" column="class_idx"/>
+		<result property="inqueryType" column="inquery_type"/>
+		<result property="userName" column="user_name"/>
+		<association property="inquiry" javaType="com.itwillbs.clish.myPage.dto.InqueryDTO">
+			<id property="inqueryIdx" column="inquery_idx"/>
+			<result property="userIdx" column="user_idx"/>
+			<result property="inqueryTitle" column="inquery_title"/>
+			<result property="inqueryDetail" column="inquery_detail"/>
+			<result property="inqueryAnswer" column="inquery_answer"/>
+			<result property="inqueryDatetime" column="inquery_datetime"/>
+			<result property="inqueryAnswerDatetime" column="inquery_answer_datetime"/>
+			<result property="inqueryModifyDatetime" column="inquery_modify_datetime"/>
+			<result property="inqueryStatus" column="inquery_status"/>
+		</association>
+	</resultMap>
+	<!-- 클래스 문의 총 개수 조회 -->
+	<select id="selectClassInquiryCountByUserIdx" resultType="int">
+		SELECT COUNT(*) 
+		FROM INQUERY i
+		JOIN CLASS c ON i.class_idx = c.class_idx
+		WHERE c.user_idx = #{userIdx}
+		AND i.inquery_type = 2
+	</select>
+	
+	<!-- 클래스 문의 리스트 조회 (페이징) -->
+	<select id="selectClassInquiryList" resultMap="inquiryJoinUserMap">
+		SELECT 
+		    i.inquery_idx,
+		    i.user_idx,
+		    i.inquery_title,
+		    i.inquery_detail,
+		    i.inquery_answer,
+		    i.inquery_datetime,
+		    i.inquery_answer_datetime,
+		    i.inquery_modify_datetime,
+		    i.inquery_status,
+		    i.inquery_type,
+		    i.class_idx,
+		    u.user_name
+		FROM INQUERY i
+		JOIN CLASS c ON i.class_idx = c.class_idx
+		LEFT JOIN USER u ON i.user_idx = u.user_idx
+		WHERE c.user_idx = #{userIdx}
+		AND i.inquery_type = 2
+		ORDER BY i.inquery_datetime DESC
+		LIMIT #{startRow}, #{listLimit}
+	</select>
+	
+	<!-- 클래스 문의 페이지 - 문의 상세 -->
+	<select id="selectClassInquiryDetail" resultMap="inquiryJoinUserMap">
+		SELECT 
+	        i.inquery_idx,
+	        i.user_idx,
+	        i.inquery_title,
+	        i.inquery_detail,
+	        i.inquery_datetime,
+	        i.inquery_answer,
+	        i.inquery_answer_datetime,
+	        i.inquery_modify_datetime,
+	        i.inquery_status,
+	        i.inquery_type,
+	        i.class_idx,
+	        u.user_name
+	    FROM INQUERY i
+	    LEFT JOIN USER u ON i.user_idx = u.user_idx
+	    WHERE i.inquery_idx = #{idx}
+	</select>
+	
+	<!-- 클래스 단건 조회 (파일 제외) -->
+	<select id="selectClassByIdx" resultType="com.itwillbs.clish.course.dto.ClassDTO">
+		SELECT 
+			class_idx,
+			class_title,
+			category_idx,
+			class_status,
+			class_price,
+			class_member,
+			start_date,
+			end_date,
+			class_days,
+			location,
+			user_idx,
+			class_type,
+			class_intro,
+			class_content
+		FROM CLASS
+		WHERE
+			class_idx = #{classIdx}
+	</select>
+	
+	<!-- 클래스 문의 페이지 - 문의 답변 -->
+	<update id="updateClassInquiry">
+		UPDATE
+			INQUERY
+		SET
+			inquery_answer = #{inqueryAnswer}
+			, inquery_answer_datetime = now()
+			, inquery_status = 2
+		WHERE
+			inquery_idx = #{idx}
+	</update>
+	
+	
+</mapper>

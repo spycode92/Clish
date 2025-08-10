@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.admin.mapper.AdminCustomerMapper">	
+	<!-- 공지사항 리스트 -->
+	<select id="selectAnnouncementList" resultType="com.itwillbs.clish.admin.dto.SupportDTO">
+		SELECT *
+		FROM SUPPORT
+		WHERE
+			support_category = '공지사항'
+			<if test="searchKeyword != ''">
+				AND 
+					support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR 
+					support_detail LIKE CONCAT('%', #{searchKeyword}, '%')		
+			</if>
+		ORDER BY
+			support_created_at
+			<choose>
+				<when test="searchType.equals('오래된순')">
+					 ASC 
+				</when>
+				<otherwise>
+					 DESC
+				</otherwise>
+			</choose>
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- SUPPORT 테이블 내용 등록 -->
+	<insert id="insertSupport">
+		INSERT INTO
+			SUPPORT
+		VALUES (
+			#{supportIdx}
+			, #{supportTitle}
+			, #{supportDetail}
+			, now()
+			, #{supportCategory}
+			, #{supportAttach}
+		)
+	</insert>
+	
+	<!-- SUPPORT 테이블 게시물 상세 조회  -->
+	<resultMap id="supportAndFileDTOResultMap" type="com.itwillbs.clish.admin.dto.SupportDTO">
+		<id property="supportIdx" column="support_idx"/>
+		<result property="supportTitle" column="support_title"/>
+		<result property="supportDetail" column="support_detail"/>
+		<result property="supportCreatedAt" column="support_created_at"/>
+		<result property="supportCategory" column="support_category"/>
+		<collection property="fileList" ofType="com.itwillbs.clish.common.file.FileDTO">
+			<id property="fileId" column="file_id"/>
+			<result property="idx" column="idx" />
+			<result property="originalFileName"  column="original_file_name"/>
+			<result property="realFileName"  column="real_file_name"/>
+			<result property="subDir"  column="sub_dir"/>
+			<result property="fileSize"  column="file_size"/>
+			<result property="contentType"  column="content_type"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectSupport" resultMap="supportAndFileDTOResultMap">
+		SELECT 
+			s.support_idx
+			, s.support_title
+			, s.support_detail
+			, s.support_created_at
+			, s.support_category
+		    , f.file_id
+		    , f.original_file_name
+		    , f.real_file_name
+		    , f.sub_dir
+		    , f.file_size
+		    , f.content_type
+		FROM 
+			SUPPORT s
+		LEFT JOIN FILE f
+		ON
+			s.support_idx = f.idx
+		WHERE
+			s.support_idx = #{idx}
+	</select>
+	
+	<!-- SUPPORT 테이블 수정 -->
+	<update id="updateSupport">
+		UPDATE
+			SUPPORT
+		SET
+			support_title = #{supportTitle}
+			, support_detail = #{supportDetail}
+			, support_category = #{supportCategory}
+		WHERE
+			support_idx = #{supportIdx}
+	</update>
+	
+	<!-- SUPPORT 테이블 삭제 -->
+	<delete id="deleteSupport">
+		DELETE 
+		FROM
+			SUPPORT
+		WHERE
+			support_idx = #{idx}
+	</delete>
+	
+	<!-- faq 목록 -->
+	<select id="selectFaqList" resultType="com.itwillbs.clish.admin.dto.SupportDTO">
+		SELECT *
+		FROM
+			SUPPORT
+		WHERE
+			support_category != '공지사항'
+	</select>
+	
+	<select id="selectFaqListAndSearch" resultType="com.itwillbs.clish.admin.dto.SupportDTO">
+		SELECT *
+		FROM	
+			SUPPORT
+		WHERE
+			support_category != '공지사항'
+			<choose>
+			<when test="searchType.equals('강의수강')">
+			AND support_category = '강의수강'
+			AND (
+				support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR  support_detail LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</when>
+			<when test="searchType.equals('계정관리')">
+			AND support_category = '계정관리'
+			AND (
+				support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR  support_detail LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</when>
+			<when test="searchType.equals('결제환불')">
+			AND support_category = '결제환불'
+			AND (
+				support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR  support_detail LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</when>
+			<otherwise>
+			AND 
+				(
+				support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR  support_detail LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</otherwise>
+			</choose>
+	</select>
+	
+	
+	<resultMap id="inquiryJoinUserMap" type="com.itwillbs.clish.admin.dto.InquiryJoinUserDTO">
+	<id property="inquiry.inqueryIdx" column="inquery_idx"/>
+	<result property="classIdx" column="class_idx"/>
+	<result property="inqueryType" column="inquery_type"/>
+	<result property="userName" column="user_name"/>
+	<association property="inquiry" javaType="com.itwillbs.clish.myPage.dto.InqueryDTO">
+		<id property="inqueryIdx" column="inquery_idx"/>
+		<result property="userIdx" column="user_idx"/>
+		<result property="inqueryTitle" column="inquery_title"/>
+		<result property="inqueryDetail" column="inquery_detail"/>
+		<result property="inqueryAnswer" column="inquery_answer"/>
+		<result property="inqueryDatetime" column="inquery_datetime"/>
+		<result property="inqueryAnswerDatetime" column="inquery_answer_datetime"/>
+		<result property="inqueryModifyDatetime" column="inquery_modify_datetime"/>
+		<result property="inqueryStatus" column="inquery_status"/>
+	</association>
+	</resultMap>
+	
+	<!-- 문의 리스트 (페이지네이션) -->
+	<select id="selectInquiries" resultMap="inquiryJoinUserMap">
+		SELECT 
+			i.inquery_idx
+			, i.user_idx
+			, i.inquery_title
+			, i.inquery_datetime
+			, i.inquery_answer_datetime
+    		, i.inquery_modify_datetime
+			, i.inquery_status
+			, i.inquery_type
+			, i.class_idx
+			, u.user_name
+		FROM 
+			INQUERY i
+		LEFT JOIN
+			USER u
+		ON
+			i.user_idx = u.user_idx
+		WHERE
+			i.inquery_type = 1
+		ORDER BY
+			inquery_datetime desc
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	
+	<!-- 문의 상세 -->
+	<resultMap id="inquiryFileMap" type="com.itwillbs.clish.admin.dto.InquiryJoinUserDTO">
+		<result property="classIdx" column="class_idx"/>
+		<result property="inqueryType" column="inquery_type"/>
+		<result property="userName" column="user_name"/>
+		<association  property="inquiry" javaType="com.itwillbs.clish.myPage.dto.InqueryDTO">
+			<id property="inqueryIdx" column="inquery_idx"/>
+			<result property="userIdx" column="user_idx"/>
+			<result property="inqueryTitle" column="inquery_title"/>
+			<result property="inqueryDetail" column="inquery_detail"/>
+			<result property="inqueryAnswer" column="inquery_answer"/>
+			<result property="inqueryDatetime" column="inquery_datetime"/>
+			<result property="inqueryAnswerDatetime" column="inquery_answer_datetime"/>
+			<result property="inqueryModifyDatetime" column="inquery_modify_datetime"/>
+			<result property="inqueryStatus" column="inquery_status"/>
+		<collection property="fileList" ofType="com.itwillbs.clish.common.file.FileDTO">
+			<id property="fileId" column="file_id"/>
+			<result property="idx" column="idx" />
+			<result property="originalFileName"  column="original_file_name"/>
+			<result property="realFileName"  column="real_file_name"/>
+			<result property="subDir"  column="sub_dir"/>
+			<result property="fileSize"  column="file_size"/>
+			<result property="contentType"  column="content_type"/>
+		</collection>
+		</association >
+	</resultMap>
+	<select id="selectInquiry" resultMap="inquiryFileMap">
+		SELECT 
+			i.inquery_idx
+			, i.user_idx
+			, i.inquery_title
+			, i.inquery_detail
+			, i.inquery_datetime
+			, i.inquery_answer
+			, i.inquery_answer_datetime
+    		, i.inquery_modify_datetime
+			, i.inquery_status
+			, i.inquery_type
+			, i.class_idx
+			, u.user_name
+			, f.file_id
+		    , f.original_file_name
+		    , f.real_file_name
+		    , f.sub_dir
+		    , f.file_size
+		    , f.content_type
+		FROM 
+			INQUERY i
+		LEFT JOIN
+			USER u
+		ON
+			i.user_idx = u.user_idx
+		LEFT JOIN
+			FILE f 
+		ON 
+			i.inquery_idx = f.idx
+		WHERE
+			i.inquery_idx = #{idx}
+		AND 
+			i.inquery_type = 1
+	</select>
+	
+	<!-- 문의 답변 -->
+	<update id="updateInquiry">
+		UPDATE
+			INQUERY
+		SET
+			inquery_answer = #{inqueryAnswer}
+			, inquery_answer_datetime = now()
+			, inquery_status = 2
+		WHERE
+			inquery_idx = #{idx}
+	</update>
+	
+	<!-- 공지사항 게시물 수 -->
+	<select id="selectCountAnnouncement" resultType="int">
+		SELECT count(*)
+		FROM SUPPORT
+		WHERE
+			support_category = '공지사항'
+		<if test="searchKeyword != ''">
+				AND 
+					support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR 
+					support_detail LIKE CONCAT('%', #{searchKeyword}, '%')		
+			
+			</if>
+	</select>
+	
+	<!-- 1:1 문의 등록 -->
+	<insert id="insertInquery">
+		INSERT INTO
+			INQUERY
+		VALUES (
+			#{inqueryIdx}
+			, #{userIdx}
+			, #{inqueryTitle}
+			, #{inqueryDetail}
+			, null
+			, now()
+			, null
+			, 1
+			, #{inqueryType}
+			, null
+			, null
+		)
+	</insert>
+	
+	<!-- 1:1 문의 게시물 수 -->
+	<select id="selectInquiryCount" resultType="int">
+		SELECT COUNT(*)
+		FROM INQUERY
+		WHERE
+			inquery_type = 1
+	</select>
+	
+	<!-- 1:1 문의 삭제 -->
+	<delete id="deleteInquiry">
+		DELETE FROM INQUERY
+		WHERE
+			inquery_idx = #{idx}
+	</delete>
+	
+	<!-- 1:1 문의 수정 -->
+	<update id="updateUserInquiry">
+		UPDATE
+			INQUERY
+		SET
+			inquery_title = #{inqueryTitle}
+			, inquery_detail = #{inqueryDetail}
+			, inquery_modify_datetime = now()
+		WHERE
+			inquery_idx = #{inqueryIdx}
+	</update>
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

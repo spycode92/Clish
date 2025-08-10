@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.home.mapper.MainMapper">
+
+	<select id="selectClassInfo" resultType="com.itwillbs.clish.course.dto.ClassDTO">
+		SELECT 
+			class_idx
+			, class_title
+			, category_idx
+			, class_status
+			, class_price
+			, class_member
+			, class_days
+			, location
+			, class_intro
+            , class_type
+			, TIMESTAMPDIFF(DAY, start_date, end_date) + 1 as class_length
+		FROM CLASS
+		WHERE
+			class_status = 2
+		AND
+			class_type = 0
+		LIMIT 10
+	</select>
+	<select id="selectClassInfo2" resultType="com.itwillbs.clish.course.dto.ClassDTO">
+		SELECT 
+			class_idx
+			, class_title
+			, category_idx
+			, class_status
+			, class_price
+			, class_member
+			, class_days
+			, location
+			, class_intro
+            , class_type
+            , created_at
+			, TIMESTAMPDIFF(DAY, start_date, end_date) + 1 as class_length			
+		FROM CLASS
+		WHERE
+			class_status = 2
+		AND
+			class_type = 1
+		LIMIT 10
+	</select>
+	<select id="selectClassInfoShortLatest" resultType="com.itwillbs.clish.course.dto.ClassDTO">
+		SELECT 
+			class_idx
+			, class_title
+			, category_idx
+			, class_status
+			, class_price
+			, class_member
+			, class_days
+			, location
+			, class_intro
+            , class_type
+            , created_at
+			, TIMESTAMPDIFF(DAY, start_date, end_date) + 1 as class_length
+		FROM CLASS
+		WHERE
+			class_status = 2
+		AND
+			class_type = 1
+		ORDER BY created_at DESC
+		LIMIT 10
+	</select>
+	<select id="selectClassLongLatest" resultType="com.itwillbs.clish.course.dto.ClassDTO">
+		SELECT 
+			class_idx
+			, class_title
+			, category_idx
+			, class_status
+			, class_price
+			, class_member
+			, class_days
+			, location
+			, class_intro
+            , class_type
+            , created_at
+			, TIMESTAMPDIFF(DAY, start_date, end_date) + 1 as class_length
+		FROM CLASS
+		WHERE
+			class_status = 2
+		AND
+			class_type = 0
+		ORDER BY created_at DESC
+		LIMIT 10
+	</select>
+	<select id="selectClassListSearch" resultType="com.itwillbs.clish.course.dto.ClassDTO">
+		SELECT *
+		FROM 
+			CLASS
+		WHERE
+			class_title LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			category_idx LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			location LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			user_idx LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			class_intro LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			class_content LIKE CONCAT('%', #{searchKeyword}, '%')
+		ORDER BY 
+			created_at DESC
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+
+	<select id="selectClassListCount" resultType="int">
+		SELECT COUNT(*)
+		FROM 
+			CLASS
+		WHERE (
+			class_title LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			category_idx LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			location LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			class_intro LIKE CONCAT('%', #{searchKeyword}, '%')
+		Or 
+			class_content LIKE CONCAT('%', #{searchKeyword}, '%')
+		)
+	</select>
+	<select id="selectAnnouncements" resultType="com.itwillbs.clish.admin.dto.SupportDTO">
+		SELECT *
+		FROM SUPPORT
+		WHERE
+			support_category LIKE CONCAT('%', #{searchKeyword}, '%')
+		OR
+			support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+		OR
+			support_detail LIKE CONCAT('%', #{searchKeyword}, '%')	
+		ORDER BY
+			support_created_at DESC
+		LIMIT
+			#{startRow}
+			, #{listLimit}
+	</select>
+	<select id="selectAnnouncementsCount" resultType="int">
+		SELECT count(*)
+		FROM SUPPORT
+		WHERE
+			support_category LIKE CONCAT('%', #{searchKeyword}, '%')
+		OR
+			support_title LIKE CONCAT('%', #{searchKeyword}, '%')
+		OR
+			support_detail LIKE CONCAT('%', #{searchKeyword}, '%')		
+	</select>
+	
+
+	
+</mapper>

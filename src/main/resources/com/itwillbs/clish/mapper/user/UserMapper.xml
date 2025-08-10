@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itwillbs.clish.user.mapper.UserMapper">
+	
+	 <insert id="insertUser" parameterType="com.itwillbs.clish.user.dto.UserDTO">
+        INSERT INTO USER (
+	          user_idx
+	        , user_name
+	        , user_rep_name
+	        , user_birth
+	        , user_gender
+	        , user_id
+	        , user_password
+	        , user_email
+	        , user_phone_number
+	        , user_phone_number_sub
+	        , user_postcode
+	        , user_address1
+	        , user_address2
+	        , user_status
+	        , user_reg_date
+	        , user_withdraw_date
+	        , user_type
+	        , user_penalty_count
+	    )
+	    VALUES (
+	          #{userIdx}
+	        , #{userName}
+	        , #{userRepName}
+	        , #{userBirth}
+	        , #{userGender}
+	        , #{userId}
+	        , #{userPassword}
+	        , #{userEmail}
+	        , #{userPhoneNumber}
+	        , #{userPhoneNumberSub}
+	        , #{userPostcode}
+	        , #{userAddress1}
+	        , #{userAddress2}
+	        , <choose>
+	              <when test="userType == 1">1</when>
+	              <otherwise>5</otherwise>
+	          </choose>
+	        , NOW()
+	        , #{userWithdrawDate}
+	        , #{userType}
+	        , 0
+	    )
+	</insert>
+    
+	<insert id="insertCompany" parameterType="com.itwillbs.clish.user.dto.CompanyDTO">
+	    INSERT INTO COMPANY (
+	        user_idx,
+	        biz_reg_no,
+	        biz_file_name,
+	        biz_file_path
+	    ) VALUES (
+	        #{userIdx},
+	        #{bizRegNo},
+	        #{bizFileName},
+	        #{bizFilePath}
+	    )
+	</insert>
+    
+	<select id="selectUserId" parameterType="String" resultType="com.itwillbs.clish.user.dto.UserDTO">
+	    SELECT
+	    	user_idx,
+	        user_name,
+	        user_id,
+	        user_password,
+	        user_status,
+	        user_type
+	    FROM
+	        USER
+	    WHERE
+	        user_id = #{userId}
+	</select>
+
+	<select id="existsByEmail" parameterType="String" resultType="Boolean"> 
+	    SELECT COUNT(*)
+	    FROM USER
+	    WHERE user_email = #{email}
+	</select>
+	
+	<select id="countByNickname" parameterType="String" resultType="int">
+	    SELECT COUNT(*)
+	    FROM USER
+	    WHERE user_rep_name = #{nickname}
+	</select>
+	
+	<select id="countByUserId" parameterType="String" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM USER 
+	    WHERE user_id = #{userId}
+	</select>
+	
+	<select id="countByUserPhoneMatch" parameterType="String" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM USER 
+	    WHERE user_phone_number = #{userPhone}
+	</select>
+	
+	<select id="selectUserIdByEmail">
+		SELECT user_id 
+		FROM USER 
+		WHERE user_email = #{email}
+	</select>
+	
+	<select id="countByIdAndEmail" resultType="int">
+	    SELECT COUNT(*)
+	    FROM USER
+	    WHERE user_id = #{userId}
+	      AND user_email = #{email}
+	</select>
+</mapper>  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

@@ -1,0 +1,66 @@
+@charset "UTF-8";
+.dashboard-container {
+  	display: flex;
+  	flex-wrap: wrap;
+  	justify-content: space-between;
+  	gap: 20px;
+}
+
+
+.dashboard-summary {
+	box-sizing: border-box;
+}
+
+.summary-card {
+	display: flex;
+  	align-items: center;
+ 	justify-content: space-between;
+  	background-color: #f5f8fc;
+  	border-radius: 12px;
+  	padding: 10px 20px;
+  	width: 240px;
+  	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+  	transition: transform 0.2s ease;
+}
+
+.summary-card:hover {
+  	transform: translateY(-2px);
+}
+
+.summary-icon {
+  	font-size: 32px;
+  	color: #0080ff;
+  	margin-right: 20px;
+  	flex-shrink: 0;
+}
+
+.summary-text {
+  	text-align: left;
+}
+
+.summary-label {
+  	font-size: 14px;
+  	color: #888;
+  	margin-bottom: 4px;
+}
+
+.summary-value {
+  	font-size: 20px;
+  	font-weight: bold;
+  	color: #000;
+}
+
+.mini-chart {
+	display: flex;
+	justify-content: space-around;
+	margin-top: 20px;
+	
+}
+
+.chart {
+	margin-top: 20px;
+}
+
+.chart > canvas {
+	margin: auto;
+}
